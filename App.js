@@ -66,7 +66,7 @@ var App = /** @class */ (function () {
         });
         this.express.use("/", router);
         this.express.use("/images", express.static(__dirname + "/img"));
-        this.express.use("/", express.static(__dirname + "/pages"));
+        this.express.use("/", express.static(__dirname + "/public"));
         this.express.use(cors);
         this.express.use(fileUpload);
     };
