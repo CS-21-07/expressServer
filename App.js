@@ -19,6 +19,8 @@ var App = /** @class */ (function () {
         });
         this.middleware();
         this.routes();
+        this.baseDir = "dest/";
+        this.uploadIdTracker = 0;
     }
     // Configure Express middleware.
     App.prototype.middleware = function () {
@@ -48,10 +50,12 @@ var App = /** @class */ (function () {
     };
     // Configure API endpoints.
     App.prototype.routes = function () {
+        var _this = this;
         var router = express.Router();
-        router.post("/upload", this.upload.single("file"), function (req, res) {
+        router.post("/api/upload/:uploadId", this.upload.single("file"), function (req, res) {
+            _this.uploadIdTracker = req.params.uploadId;
             var tempPath = req["file"].path;
-            var targetPath = path.join(__dirname, "./files/raw.qkview");
+            var targetPath = path.join(__dirname, "./files/" + "upload_" + _this.uploadIdTracker + "_raw.qkview");
             /** A better way to copy the uploaded file. **/
             var src = fs.createReadStream(tempPath);
             var dest = fs.createWriteStream(targetPath);
@@ -63,6 +67,21 @@ var App = /** @class */ (function () {
             //   res.render("error");
             // });
             res.send("file has been uploaded");
+        });
+        router.get("/api/jsonfile/:filename", function (req, res) {
+            var fname = req.params.filename;
+            console.log(fname);
+            fs.readFile(_this.baseDir + fname, "utf-8", function (err, data) {
+                if (err) {
+                    res.json({
+                        message: err.message,
+                        error: err
+                    });
+                }
+                else {
+                    res.send(data);
+                }
+            });
         });
         this.express.use("/", router);
         this.express.use("/images", express.static(__dirname + "/img"));

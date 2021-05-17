@@ -12,6 +12,8 @@ class App {
   // ref to Express instance
   public express: express.Application;
   public upload;
+  public baseDir: string;
+  public uploadIdTracker: number;
 
   //Run configuration methods on the Express instance.
   constructor() {
@@ -21,6 +23,8 @@ class App {
     });
     this.middleware();
     this.routes();
+    this.baseDir = "dest/";
+    this.uploadIdTracker = 0;
   }
 
   // Configure Express middleware.
@@ -60,20 +64,43 @@ class App {
   private routes(): void {
     let router = express.Router();
 
-    router.post("/upload", this.upload.single("file"), (req, res) => {
-      const tempPath = req["file"].path;
-      const targetPath = path.join(__dirname, "./files/raw.qkview");
-      /** A better way to copy the uploaded file. **/
-      var src = fs.createReadStream(tempPath);
-      var dest = fs.createWriteStream(targetPath);
-      src.pipe(dest);
-      // src.on("end", function () {
-      //   res.render("complete");
-      // });
-      // src.on("error", function (err) {
-      //   res.render("error");
-      // });
-      res.send("file has been uploaded");
+    router.post(
+      "/api/upload/:uploadId",
+      this.upload.single("file"),
+      (req, res) => {
+        this.uploadIdTracker = req.params.uploadId;
+        const tempPath = req["file"].path;
+        const targetPath = path.join(
+          __dirname,
+          "./files/" + "upload_" + this.uploadIdTracker + "_raw.qkview"
+        );
+        /** A better way to copy the uploaded file. **/
+        var src = fs.createReadStream(tempPath);
+        var dest = fs.createWriteStream(targetPath);
+        src.pipe(dest);
+        // src.on("end", function () {
+        //   res.render("complete");
+        // });
+        // src.on("error", function (err) {
+        //   res.render("error");
+        // });
+        res.send("file has been uploaded");
+      }
+    );
+
+    router.get("/api/jsonfile/:filename", (req, res) => {
+      let fname = req.params.filename;
+      console.log(fname);
+      fs.readFile(this.baseDir + fname, "utf-8", (err, data) => {
+        if (err) {
+          res.json({
+            message: err.message,
+            error: err,
+          });
+        } else {
+          res.send(data);
+        }
+      });
     });
 
     this.express.use("/", router);
