@@ -1,22 +1,21 @@
-const fs = require("fs-extra");
-const rrdStream = require("./RRDStream");
-const tar = require("tar");
-const path = require("path");
-const { Console } = require("console");
-const { pipeline } = require("stream");
+const fs = require('fs-extra');
+const rrdStream = require('./RRDStream');
+const util = require('util');
+const tar = require('tar');
+const path = require('path');
+const { pipeline } = require('stream');
+const pipelineAsync = util.promisify(pipeline);
+const readdir = util.promisify(fs.readdir);
 
 //input and output files
-var qkviewDIR = fs.readdir("../files");
-var finalDest = "../src/data/rawJson";
-var rrdDest = "../src/data/rawRdd";
-if (!fs.existsSync(rrdDest)) {
-  fs.mkdirSync(rrdDest);
-}
+var qkviewDIR = "../files/rawQKView";
+var finalDest = "../files/JSON_final";
+var rrdDest = "../files/rawRRD";
 
 //extract all rrd files from the tarball
-const extractTarball = async (cb) => {
+const extractTarball = async (qkviewFile, cb) => {
   tar.extract({
-    file: qkviewDIR,
+    file: qkviewFile,
     cwd: rrdDest,
     sync: true,
     strip: 2,
@@ -27,7 +26,8 @@ const extractTarball = async (cb) => {
       return false;
     },
   });
-}; //end of untaring
+};//end of untaring
+
 
 //start of converting
 var rrd_Path_Array = [];
@@ -46,6 +46,7 @@ function changeExtension(file, extension) {
 //callback function for streamToFile
 const reactToStreamEvents = async (value) => {
   //continue to next file
+  console.log(filesConverted, fileCount)
   if (filesConverted < fileCount - 1) {
     filesConverted++;
     await streamToFile(
@@ -63,46 +64,52 @@ const reactToStreamEvents = async (value) => {
 
 //pipe from rrd to json using rrdStream transformation
 const streamToFile = async (rrdPath, jsonPath, callback) => {
-  file = jsonPath.substring(jsonPath.lastIndexOf("/") + 1) + ":";
-  await pipeline(
-    fs.createReadStream(rrdPath),
-    rrdStream(),
-    fs.createWriteStream(jsonPath),
-    (err) => {
-      if (err) {
-        console.error(file, "conversion failed", err);
-      } else {
-        console.log(file, "conversion succeeded");
-        callback();
-      }
-    }
-  );
+  try{
+    file = jsonPath.substring(jsonPath.lastIndexOf("/") + 1) + ":";
+      await pipelineAsync(
+        fs.createReadStream(rrdPath),
+        rrdStream(),
+        fs.createWriteStream(jsonPath).on('close', callback)
+    )//.catch(error => (error.code !== "ERR_STREAM_PREMATURE_CLOSE" && Promise.reject(error)));
+  } catch(e){
+    console.log(e)
+  }
 };
 
 //add all rrd files from qkviewDIR into rrdDest
-for (var file in qkviewDIR) {
-  if (file.includes(".qkview")) {
-    extractTarball();
-  } else if (file.includes(".rrd")) {
-    //this WILL remove the rrd file from its current location
-    fs.rename(file, path.join(rrdDest, file));
-  }
+export const removeRRD = async () => {
+  console.log("start")
+  let files = await readdir(qkviewDIR);
+  const promises = []
+  files.forEach((qkviewFile) => {
+    if (qkviewFile.includes(".qkview")) {
+      console.log("inner")
+      promises.push(extractTarball(qkviewDIR + "/" + qkviewFile));
+    } else if (qkviewFile.includes(".rrd")) {
+      //this WILL remove the rrd file from its current location
+      fs.rename(qkviewFile, path.join(rrdDest, qkviewFile));
+    }
+  })
+  await Promise.all(promises)
+  await processRRD();
+  console.log("outer")
 }
 
 //start processing all rrd files
-fs.readdir(rrdDest, async function (err, files) {
+const processRRD = async () => {
+  let files = await readdir(rrdDest);
   fileCount = files.length;
-  for (let rrdFile of files) {
+  files.forEach((rrdFile) =>{
     finalName = changeExtension(rrdFile, ".json");
     rrdFile = path.join(rrdDest, rrdFile);
 
     rrd_Path_Array.push(rrdFile);
     json_Path_Array.push(finalName);
-  }
+  })
   //start streaming from rrd to json
-  streamToFile(
+  await streamToFile(
     rrd_Path_Array[filesConverted],
     json_Path_Array[filesConverted],
     reactToStreamEvents
   );
-});
+};

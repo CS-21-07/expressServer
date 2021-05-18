@@ -7,6 +7,7 @@ import * as fileUpload from "express-fileupload";
 import * as cors from "cors";
 import * as multer from "multer";
 import * as fs from "fs";
+import removeRRD from "./rrdjs/index.js"
 // Creates and configures an ExpressJS web server.
 class App {
   // ref to Express instance
@@ -19,11 +20,11 @@ class App {
   constructor() {
     this.express = express();
     this.upload = multer({
-      dest: "uploaded/",
+      dest: "files/rawQKView/",
     });
     this.middleware();
     this.routes();
-    this.baseDir = "dest/";
+    this.baseDir = "files/";
     this.uploadIdTracker = 0;
   }
 
@@ -68,16 +69,17 @@ class App {
       "/api/upload/:uploadId",
       this.upload.single("file"),
       (req, res) => {
-        this.uploadIdTracker = req.params.uploadId;
-        const tempPath = req["file"].path;
-        const targetPath = path.join(
-          __dirname,
-          "./files/" + "upload_" + this.uploadIdTracker + "_raw.qkview"
-        );
+        // this.uploadIdTracker = req.params.uploadId;
+        // const tempPath = req["file"].path;
+        // const targetPath = path.join(
+        //   __dirname,
+        //   "./files/rawQKView" + "upload_" + this.uploadIdTracker + "_raw.qkview"
+        // );
         /** A better way to copy the uploaded file. **/
-        var src = fs.createReadStream(tempPath);
-        var dest = fs.createWriteStream(targetPath);
-        src.pipe(dest);
+        removeRRD()
+        // var src = fs.createReadStream(tempPath);
+        // var dest = fs.createWriteStream(targetPath);
+        // src.pipe(dest);
         // src.on("end", function () {
         //   res.render("complete");
         // });

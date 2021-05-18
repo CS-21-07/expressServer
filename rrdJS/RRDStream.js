@@ -99,7 +99,7 @@ RRDStream.prototype._transform = function(chunk, encoding, done) {
           this.emit('rra', this.header.rra[this.rra_index]);
 
           this.rra.on('row', (function(step, values) {
-            console.assert(step <= dict.meta.steps.slice(-1));
+            //console.assert(step <= dict.meta.steps.slice(-1));
 
           }).bind(this));
           // RRD parse has completed
