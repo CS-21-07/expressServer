@@ -7,8 +7,10 @@ import * as fileUpload from "express-fileupload";
 import * as cors from "cors";
 import * as multer from "multer";
 import * as fs from "fs";
-import removeRRD from "./rrdjs/index.js"
+import removeRRD from "./rrdjs/index.js";
+import * as childProcess from "child_process";
 // Creates and configures an ExpressJS web server.
+//npm install @types/node@latest
 class App {
   // ref to Express instance
   public express: express.Application;
@@ -20,11 +22,11 @@ class App {
   constructor() {
     this.express = express();
     this.upload = multer({
-      dest: "files/rawQKView/",
+      dest: "dest",
     });
     this.middleware();
     this.routes();
-    this.baseDir = "files/";
+    this.baseDir = "rrdJS/files/JSON_final/";
     this.uploadIdTracker = 0;
   }
 
@@ -68,25 +70,33 @@ class App {
     router.post(
       "/api/upload/:uploadId",
       this.upload.single("file"),
-      (req, res) => {
-        // this.uploadIdTracker = req.params.uploadId;
-        // const tempPath = req["file"].path;
-        // const targetPath = path.join(
-        //   __dirname,
-        //   "./files/rawQKView" + "upload_" + this.uploadIdTracker + "_raw.qkview"
-        // );
+      async (req, res) => {
+        this.uploadIdTracker = req.params.uploadId;
+        const tempPath = req["file"].path;
+        const targetPath = path.join(
+          __dirname,
+          "rrdJS/files/rawQKView/" +
+            "upload_" +
+            this.uploadIdTracker +
+            "_raw.qkview"
+        );
         /** A better way to copy the uploaded file. **/
-        removeRRD()
-        // var src = fs.createReadStream(tempPath);
-        // var dest = fs.createWriteStream(targetPath);
-        // src.pipe(dest);
-        // src.on("end", function () {
-        //   res.render("complete");
-        // });
-        // src.on("error", function (err) {
-        //   res.render("error");
-        // });
-        res.send("file has been uploaded");
+
+        var src = fs.createReadStream(tempPath);
+        var dest = fs.createWriteStream(targetPath);
+        src.pipe(dest);
+        var done = await src.on("end", function () {
+          res.send("file has been uploaded");
+        });
+        src.on("error", function (err) {
+          res.send("Error in uploading files");
+        });
+        if (done) {
+          this.runScript("./rrdJS/index.js", function (err) {
+            if (err) throw err;
+            console.log("finished running the converter");
+          });
+        }
       }
     );
 
@@ -105,12 +115,55 @@ class App {
       });
     });
 
+    router.delete("/api/deleteAll", (req, res) => {
+      this.deleteContentOfFolder("rrdJS/files/JSON_final");
+      this.deleteContentOfFolder("rrdJS/files/rawQKView");
+      this.deleteContentOfFolder("rrdJS/files/rawRRD");
+
+      res.send("done!");
+    });
+
     this.express.use("/", router);
 
     this.express.use("/images", express.static(__dirname + "/img"));
     this.express.use("/", express.static(__dirname + "/public"));
     this.express.use(cors);
     this.express.use(fileUpload);
+  }
+
+  runScript(scriptPath, callback) {
+    // keep track of whether callback has been invoked to prevent multiple invocations
+    console.log("STARTED");
+    var invoked = false;
+
+    var process = childProcess.fork(scriptPath);
+
+    // listen for errors as they may prevent the exit event from firing
+    process.on("error", function (err) {
+      if (invoked) return;
+      invoked = true;
+      callback(err);
+    });
+
+    // execute the callback once the process has finished running
+    process.on("exit", function (code) {
+      if (invoked) return;
+      invoked = true;
+      var err = code === 0 ? null : new Error("exit code " + code);
+      callback(err);
+    });
+  }
+
+  deleteContentOfFolder(directory: string) {
+    fs.readdir(directory, (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlink(path.join(directory, file), (err) => {
+          if (err) throw err;
+        });
+      }
+    });
   }
 }
 
