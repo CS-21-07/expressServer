@@ -142,6 +142,7 @@ var App = /** @class */ (function () {
             _this.deleteContentOfFolder("rrdJS/files/JSON_final");
             _this.deleteContentOfFolder("rrdJS/files/rawQKView");
             _this.deleteContentOfFolder("rrdJS/files/rawRRD");
+            _this.deleteContentOfFolder("dest");
             res.send("done!");
         });
         this.express.use("/", router);

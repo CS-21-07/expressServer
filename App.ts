@@ -119,6 +119,7 @@ class App {
       this.deleteContentOfFolder("rrdJS/files/JSON_final");
       this.deleteContentOfFolder("rrdJS/files/rawQKView");
       this.deleteContentOfFolder("rrdJS/files/rawRRD");
+      this.deleteContentOfFolder("dest");
 
       res.send("done!");
     });
