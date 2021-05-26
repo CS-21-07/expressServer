@@ -92,16 +92,19 @@ var App = /** @class */ (function () {
         var _this = this;
         var router = express.Router();
         router.post("/api/upload/:uploadId", this.upload.single("file"), function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var tempPath, targetPath, src, dest, done;
+            var nms, tempPath, targetPath, src, dest, done;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        nms = req["file"].filename;
                         this.uploadIdTracker = req.params.uploadId;
                         tempPath = req["file"].path;
                         targetPath = path.join(__dirname, "rrdJS/files/rawQKView/" +
                             "upload_" +
                             this.uploadIdTracker +
                             "_raw.qkview");
+                        /** A better way to copy the uploaded file. **/
+                        console.log(nms);
                         src = fs.createReadStream(tempPath);
                         dest = fs.createWriteStream(targetPath);
                         src.pipe(dest);

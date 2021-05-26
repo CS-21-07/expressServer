@@ -9,9 +9,11 @@ const readdir = util.promisify(fs.readdir);
 
 //input and output files
 var qkviewDIR = __dirname + "/files/rawQKView";
-var finalDest = __dirname + "/files/JSON_final";
-var rrdDest = __dirname + "/files/rawRRD";
-
+var base_finalDest = __dirname + "/files/JSON_final";
+var finalDest;
+var base_rrdDest = __dirname + "/files/rawRRD";
+var rrdDest;
+var directories = []
 //extract all rrd files from the tarball
 const extractTarball = async (qkviewFile, cb) => {
   tar.extract({
@@ -45,9 +47,9 @@ function changeExtension(file, extension) {
 //callback function for streamToFile
 const reactToStreamEvents = async (value) => {
   //continue to next file
-  console.log(filesConverted, fileCount);
   if (filesConverted < fileCount - 1) {
     filesConverted++;
+    
     await streamToFile(
       rrd_Path_Array[filesConverted],
       json_Path_Array[filesConverted],
@@ -56,15 +58,21 @@ const reactToStreamEvents = async (value) => {
   }
   //all files processed
   //TODO: empty qkview and rrd directories
-  else {
-    console.log("All done!");
+  else if (directories.length){
+    rrd_Path_Array = []
+    json_Path_Array = []
+    filesConverted = 0
+    var dirs = directories.pop()
+    await processRRD(dirs[0], dirs[1])
+  }
+  else{
+    console.log("All done!")
   }
 };
 
 //pipe from rrd to json using rrdStream transformation
 const streamToFile = async (rrdPath, jsonPath, callback) => {
   try {
-    file = jsonPath.substring(jsonPath.lastIndexOf("/") + 1) + ":";
     await pipelineAsync(
       fs.createReadStream(rrdPath),
       rrdStream(),
@@ -75,27 +83,49 @@ const streamToFile = async (rrdPath, jsonPath, callback) => {
   }
 };
 
+const get_dir_name = (incoming, root_dir) =>{
+  var folder = incoming.substring(incoming.lastIndexOf("/") + 1, incoming.lastIndexOf("."))
+  var sub_dir = path.join(root_dir, folder)
+  return sub_dir
+}
+
+
+const create_sub_dir = (incoming, root_dir) =>{
+  var sub_dir = get_dir_name(incoming, root_dir)
+  if (!fs.existsSync(sub_dir)){
+    fs.mkdirSync(sub_dir);
+  }
+  return sub_dir
+}
+
 //add all rrd files from qkviewDIR into rrdDest
 const removeRRD = async () => {
-  console.log("start");
   let files = await readdir(qkviewDIR);
   const promises = [];
+
   files.forEach((qkviewFile) => {
-    if (qkviewFile.includes(".qkview")) {
-      console.log("inner");
+    if (qkviewFile.includes(".qkview") && !fs.existsSync(get_dir_name(qkviewFile, base_rrdDest))) {
+
+      rrdDest = create_sub_dir(qkviewFile, base_rrdDest);
+      finalDest = create_sub_dir(qkviewFile, base_finalDest);
+      directories.push([rrdDest, finalDest]);
+      
       promises.push(extractTarball(qkviewDIR + "/" + qkviewFile));
     } else if (qkviewFile.includes(".rrd")) {
-      //this WILL remove the rrd file from its current location
       fs.rename(qkviewFile, path.join(rrdDest, qkviewFile));
     }
   });
-  await Promise.all(promises);
-  await processRRD();
-  console.log("outer");
+  await Promise.all(promises)
+
+  var dirs = directories.pop()
+  await processRRD(dirs[0], dirs[1])
 };
 
 //start processing all rrd files
-const processRRD = async () => {
+const processRRD = async (rrd, json) => {
+  rrdDest = rrd
+  finalDest = json
+  console.log(rrdDest);
   let files = await readdir(rrdDest);
   fileCount = files.length;
   files.forEach((rrdFile) => {
@@ -106,11 +136,12 @@ const processRRD = async () => {
     json_Path_Array.push(finalName);
   });
   //start streaming from rrd to json
-  await streamToFile(
+
+    streamToFile(
     rrd_Path_Array[filesConverted],
     json_Path_Array[filesConverted],
     reactToStreamEvents
-  );
+    );
 };
 
 removeRRD();

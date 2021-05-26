@@ -72,6 +72,7 @@ class App {
       "/api/upload/:uploadId",
       this.upload.single("file"),
       async (req, res) => {
+        const nms = req["file"].filename
         this.uploadIdTracker = req.params.uploadId;
         const tempPath = req["file"].path;
         const targetPath = path.join(
@@ -82,7 +83,7 @@ class App {
             "_raw.qkview"
         );
         /** A better way to copy the uploaded file. **/
-
+        console.log(nms)
         var src = fs.createReadStream(tempPath);
         var dest = fs.createWriteStream(targetPath);
         src.pipe(dest);
