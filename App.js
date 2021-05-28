@@ -57,7 +57,7 @@ var App = /** @class */ (function () {
         });
         this.middleware();
         this.routes();
-        this.baseDir = "rrdJS/files/JSON_final/";
+        this.baseDir = "rrdJS/files/JSON_final/upload_0_raw/";
         this.uploadIdTracker = 0;
     }
     // Configure Express middleware.
