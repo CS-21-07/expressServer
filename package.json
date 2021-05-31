@@ -25,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "jest": "^27.0.3",
     "typescript": "^2.9.2"
   }
 }
