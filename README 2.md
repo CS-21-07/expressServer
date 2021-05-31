@@ -6,11 +6,11 @@ Make sure you install the node.js server software.  Ensure your path variable co
 
 To execute the server run the following commands:
 
-1. install prerequisites: npm install
+1. install prerequisites: npm install (inside both expressServer directory and rrdJS directory since there are 2 different package.json)
 
 2. compile AppServer.ts: tsc AppServer.ts
 
-3. execute AppServer: node AppServer.js
+3. execute AppServer: node AppServer.js (npm start)
 
 To test static server routes, try the following URL on the browser while the server is running:
 * http://localhost:8080/
