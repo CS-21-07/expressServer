@@ -99,11 +99,10 @@ const create_sub_dir = (incoming, root_dir) =>{
 }
 
 //add all rrd files from qkviewDIR into rrdDest
-export const removeRRD = async (qkv = qkviewDIR) => {
+const removeRRD = async (qkv = qkviewDIR) => {
   
   let files = await readdir(qkv);
   const promises = [];
-
   files.forEach((qkviewFile) => {
     if (qkviewFile.includes(".qkview") && !fs.existsSync(get_dir_name(qkviewFile, base_rrdDest))) {
 
@@ -119,11 +118,13 @@ export const removeRRD = async (qkv = qkviewDIR) => {
   await Promise.all(promises)
 
   var dirs = directories.pop()
-  await processRRD(dirs[0], dirs[1])
+  if(dirs.length){
+    await processRRD(dirs[0], dirs[1])
+  }
 };
 
 //start processing all rrd files
-export const processRRD = async (rrd, json) => {
+const processRRD = async (rrd, json) => {
   rrdDest = rrd
   finalDest = json
   console.log(rrdDest);
