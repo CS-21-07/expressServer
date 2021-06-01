@@ -1,4 +1,4 @@
-# RRDjs [![Build Status](https://travis-ci.org/WernerBlake/RRDjs.svg?branch=master)](https://travis-ci.org/WernerBlake/RRDjs)
+# F5 iHealth Capstone Project
 
 Convert an RRD file into a JSON file within Node.js without the use of underlying dependencies.
 
@@ -91,13 +91,13 @@ Each key within the Meta dictionary corresponds with an array of size equal to t
 (files populating on the express server)
 
 ### Front-end
-![til](../misc/graph_pt2.gif)
-
-()
-
 ![til](../misc/graph_pt1.gif)
 
-()
+(View a predefined graph)
+
+![til](../misc/graph_pt2.gif)
+
+(View a custom graph)
 
 ## Tests:
 Test features are currently being added.
