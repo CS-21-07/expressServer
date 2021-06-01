@@ -87,16 +87,13 @@ Each key within the Meta dictionary corresponds with an array of size equal to t
 ```
 
 ![til](../misc/upload_pt2.gif)
-
 (files populating on the express server)
 
 ### Front-end
 ![til](../misc/graph_pt1.gif)
-
 (View a predefined graph)
 
 ![til](../misc/graph_pt2.gif)
-
 (View a custom graph)
 
 ## Tests:
