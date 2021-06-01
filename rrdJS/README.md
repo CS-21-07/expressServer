@@ -4,23 +4,30 @@ Convert an RRD file into a JSON file within Node.js without the use of underlyin
 
 ## Quick Overview:
 
+
+### Run graphing_utility:
 ```js
-$ npm run build origin.rrd destination.json
+$ npm install
 ```
+```js
+$ npm start
+```
+### Run expressServer:
+
+```js
+$ npm install
+```
+```js
+$ npm start
+```
+
+
+
 ```js
 $ node index.js origin.rrd destination.json
 ```
 
 ## Input:
-Conversion requires a Round Robin Database file to serve as the origin.
-
-If you've made it this far, you probably know what that means.
-
-If not: click the logo to find out more!
-
-<a href="https://oss.oetiker.ch/rrdtool/" target="_blank">
-<img src=https://www.phparch.com/wp-content/uploads/2011/02/rrdtool-3dlogo-e1298487072986-150x66.png />
-</a>
 
 ## Output:
 The JSON file will be made up of two main parts:
