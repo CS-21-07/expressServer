@@ -14,9 +14,6 @@ Graph times series data that has been converted from RRD files.
   * [Front-end](#front-end)
 - [Tests](#tests)
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
-
 ## Quick Overview
 
 
