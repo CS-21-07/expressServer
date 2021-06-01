@@ -2,6 +2,7 @@
 
 Graph times series data that has been converted from RRD files.
 
+## Table of Contents
 - [Quick Overview](#quick-overview)
   * [Run graphing_utility](#run-graphing_utility)
   * [Run expressServer](#run-expressserver)
