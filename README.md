@@ -2,6 +2,21 @@
 
 Graph times series data that has been converted from RRD files.
 
+- [Quick Overview:](#quick-overview-)
+  * [Run graphing_utility:](#run-graphing-utility-)
+  * [Run expressServer:](#run-expressserver-)
+- [Input:](#input-)
+- [Output:](#output-)
+  * [Back end:](#back-end-)
+    + [RRD Meta Data:](#rrd-meta-data-)
+  * [DS Data:](#ds-data-)
+  * [Front-end](#front-end)
+- [Tests:](#tests-)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
+
 ## Quick Overview:
 
 
