@@ -30,10 +30,12 @@ $ node index.js origin.rrd destination.json
 ## Input:
 
 ## Output:
+
+### Back end:
 The JSON file will be made up of two main parts:
 1. The Meta data for the entire RRD file
 2. All of the DS data
-### RRD Meta Data:
+#### RRD Meta Data:
 
 ```JSON
 {
@@ -86,6 +88,8 @@ Each key within the Meta dictionary corresponds with an array of size equal to t
     "DS_NAME_N": { ... }
 }
 ```
+
+### Front-end
 
 ## Tests:
 Test features are currently being added.
