@@ -1,6 +1,6 @@
 # F5 iHealth Capstone Project
 
-Convert an RRD file into a JSON file within Node.js without the use of underlying dependencies.
+Graph times series data that has been converted from RRD files.
 
 ## Quick Overview:
 
