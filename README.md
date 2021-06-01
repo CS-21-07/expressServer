@@ -115,7 +115,9 @@ Each key within the Meta dictionary corresponds with an array of size equal to t
 ```
 
 Uploaded QKView files get stores in RRDJS/files/rawQKView
+
 Extracted RRD files get stored in RRDJS/files/rawRRD
+
 Converted JSON files get stored in RRDJS/files/JSON_final
 
 as demonstrated in the gif below:
